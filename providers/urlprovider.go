@@ -8,20 +8,30 @@ const (
 	METADATA_URL      = "https://speed.cloudflare.com/meta"
 )
 
+type IUrlProvider interface {
+	GetDownloadTestUrl(testId int64, payloadSize int64) string
+	GetUploadUrl(testId int64) string
+	GetMetadataUrl() string
+}
+
 /* This interface provides methods for retreiving urls necessary for the speed tests */
-type UrlProvider struct{}
+type urlProvider struct{}
+
+func NewUrlProvider() IUrlProvider {
+	return &urlProvider{}
+}
 
 /* Get the URL for the download speed test */
-func (provider *UrlProvider) GetDownloadTestUrl(testId int64, payloadSize int64) string {
+func (provider *urlProvider) GetDownloadTestUrl(testId int64, payloadSize int64) string {
 	return fmt.Sprintf(DOWNLOAD_TEST_URL, testId, payloadSize)
 }
 
 /* Get the URL for the upload speed test */
-func (provider *UrlProvider) GetUploadUrl(testId int64) string {
+func (provider *urlProvider) GetUploadUrl(testId int64) string {
 	return fmt.Sprintf(UPLOAD_TEST_URL, testId)
 }
 
 /* Get the URL for connection metadata */
-func (provider *UrlProvider) GetMetadataUrl() string {
+func (provider *urlProvider) GetMetadataUrl() string {
 	return METADATA_URL
 }

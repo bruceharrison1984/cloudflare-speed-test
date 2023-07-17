@@ -9,18 +9,18 @@ import (
 )
 
 /* This engine runs the bandwidth test */
-type BandwidthEngine struct {
-	SpeedTestClient *clients.BandwidthTestClient
-	urlProvider     providers.UrlProvider
+type bandwidthEngine struct {
+	SpeedTestClient clients.IBandwidthClient
+	urlProvider     providers.IUrlProvider
 }
 
 /* Create a new bandwidth engine */
-func NewBandwidthEngine(speedTestClient *clients.BandwidthTestClient, urlProvider providers.UrlProvider) *BandwidthEngine {
-	return &BandwidthEngine{speedTestClient, urlProvider}
+func NewBandwidthEngine(speedTestClient clients.IBandwidthClient, urlProvider providers.IUrlProvider) *bandwidthEngine {
+	return &bandwidthEngine{speedTestClient, urlProvider}
 }
 
 /* Run the bandwidth test */
-func (engine *BandwidthEngine) RunTest(ctx context.Context, testId int64, testCases []types.SpeedTestCase, rawResultsChannel chan *types.RawBandwidthClientResult, errorChan chan error) {
+func (engine *bandwidthEngine) RunTest(ctx context.Context, testId int64, testCases []types.SpeedTestCase, rawResultsChannel chan *types.RawBandwidthClientResult, errorChan chan error) {
 	for x := 0; x < len(testCases); x++ {
 		testCase := testCases[x]
 		for i := 0; i < testCase.Iterations; i++ {

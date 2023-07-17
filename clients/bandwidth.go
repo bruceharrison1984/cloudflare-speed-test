@@ -15,18 +15,22 @@ import (
 	"github.com/bruceharrison1984/cloudflare-speed-test/types"
 )
 
+type IBandwidthClient interface {
+	RunTest(ctx context.Context, url string, testId int64, payloadLength int64, testType types.BandwidthTestType) (*types.RawBandwidthClientResult, error)
+}
+
 /* This is the client that is used during the bandwidth test */
-type BandwidthTestClient struct {
+type bandwidthTestClient struct {
 	Http *http.Client
 }
 
 /* Create a new bandwidth client */
-func NewBandwidthClient(http *http.Client) *BandwidthTestClient {
-	return &BandwidthTestClient{http}
+func NewBandwidthClient(http *http.Client) IBandwidthClient {
+	return &bandwidthTestClient{http}
 }
 
 /* Begin running the bandwidth test */
-func (client BandwidthTestClient) RunTest(ctx context.Context, url string, testId int64, payloadLength int64, testType types.BandwidthTestType) (*types.RawBandwidthClientResult, error) {
+func (client *bandwidthTestClient) RunTest(ctx context.Context, url string, testId int64, payloadLength int64, testType types.BandwidthTestType) (*types.RawBandwidthClientResult, error) {
 	var handshakeComplete time.Time
 	var ttfb, ttlb time.Duration
 
@@ -89,7 +93,7 @@ func (client BandwidthTestClient) RunTest(ctx context.Context, url string, testI
 }
 
 /* Create a zero'd out payload for use in bandwidth test */
-func (runner BandwidthTestClient) createRequestBody(testType types.BandwidthTestType, payloadLength int64) io.Reader {
+func (runner *bandwidthTestClient) createRequestBody(testType types.BandwidthTestType, payloadLength int64) io.Reader {
 	if testType == types.Download {
 		return nil
 	}
@@ -98,7 +102,7 @@ func (runner BandwidthTestClient) createRequestBody(testType types.BandwidthTest
 }
 
 // Extract server time from response headers
-func (runner BandwidthTestClient) getServerTiming(headers *http.Header) time.Duration {
+func (runner *bandwidthTestClient) getServerTiming(headers *http.Header) time.Duration {
 	var rawTiming = headers.Get("server-timing")
 
 	regex, _ := regexp.Compile("dur=([0-9.]+)")

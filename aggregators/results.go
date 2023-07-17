@@ -1,4 +1,4 @@
-package engines
+package aggregators
 
 import (
 	"math"
@@ -9,7 +9,7 @@ import (
 )
 
 /* Engine that aggregates the test results */
-type ResultsEngine struct {
+type resultsAggregator struct {
 	speedTestMetadata       *types.CloudflareMetadata
 	SpeedTestSummaryChannel chan *types.SpeedTestSummary   // Piping this channel will give access to the final summary once a run completes
 	bandwidthResults        []*types.BandwidthClientResult // Internal array of results
@@ -17,8 +17,8 @@ type ResultsEngine struct {
 }
 
 /* Create a new results engine */
-func NewResultsEngine(summaryChannel chan *types.SpeedTestSummary, metadata *types.CloudflareMetadata, outputErrors chan error) *ResultsEngine {
-	return &ResultsEngine{SpeedTestSummaryChannel: summaryChannel, speedTestMetadata: metadata, ErrorChannel: outputErrors}
+func NewResultsAggregator(summaryChannel chan *types.SpeedTestSummary, metadata *types.CloudflareMetadata, outputErrors chan error) *resultsAggregator {
+	return &resultsAggregator{SpeedTestSummaryChannel: summaryChannel, speedTestMetadata: metadata, ErrorChannel: outputErrors}
 }
 
 /*
@@ -26,7 +26,7 @@ Listen to the raw data channels and compile metrics in real-time based on the re
 
 Compiled results are available on the SpeedTestSummaryChannel.
 */
-func (engine *ResultsEngine) Listen(rawResultsChan chan *types.RawBandwidthClientResult, errorChan chan error) {
+func (engine *resultsAggregator) Listen(rawResultsChan chan *types.RawBandwidthClientResult, errorChan chan error) {
 	for {
 		select {
 		case rawResult, ok := <-rawResultsChan:
@@ -54,7 +54,7 @@ func (engine *ResultsEngine) Listen(rawResultsChan chan *types.RawBandwidthClien
 	}
 }
 
-func (engine ResultsEngine) calculateMetrics(testType types.BandwidthTestType, serverTiming time.Duration, ttfb time.Duration, ttlb time.Duration, responseSizeBytes int64) types.BandwidthClientResult {
+func (engine resultsAggregator) calculateMetrics(testType types.BandwidthTestType, serverTiming time.Duration, ttfb time.Duration, ttlb time.Duration, responseSizeBytes int64) types.BandwidthClientResult {
 	ping := (ttfb - serverTiming).Seconds()
 	if ping <= 0 {
 		ping = (time.Millisecond * 1).Seconds()
@@ -81,7 +81,7 @@ func Round(val float64) float64 {
 	return math.Round(val*(math.Pow10(3))) / math.Pow10(3)
 }
 
-func (engine ResultsEngine) CalculatePercentiles() *types.BandwidthClientResultSummary {
+func (engine resultsAggregator) CalculatePercentiles() *types.BandwidthClientResultSummary {
 	// summary percentile
 	var pings []float64
 	var downloads []float64

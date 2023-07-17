@@ -5,12 +5,16 @@ import (
 )
 
 /* Overrides for the default transport */
-type CloudflareSpeedTestTransport struct {
+type cloudflareSpeedTestTransport struct {
 	base http.RoundTripper
 	http.Transport
 }
 
-func (t *CloudflareSpeedTestTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+func NewCloudflareSpeedTestTransport() *cloudflareSpeedTestTransport {
+	return &cloudflareSpeedTestTransport{}
+}
+
+func (t *cloudflareSpeedTestTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	t.MaxIdleConns = 100
 	t.MaxIdleConnsPerHost = 100
 

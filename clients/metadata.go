@@ -10,19 +10,23 @@ import (
 	"github.com/bruceharrison1984/cloudflare-speed-test/types"
 )
 
-type MetadataClient struct {
+type IMetadataClient interface {
+	FetchMetadata() (*types.CloudflareMetadata, error)
+}
+
+type metadataClient struct {
 	Http        *http.Client
-	urlProvider providers.UrlProvider
+	urlProvider providers.IUrlProvider
 }
 
-func NewMetadataClient(http *http.Client, urlProvider providers.UrlProvider) *MetadataClient {
-	return &MetadataClient{http, urlProvider}
+func NewMetadataClient(http *http.Client, urlProvider providers.IUrlProvider) IMetadataClient {
+	return &metadataClient{http, urlProvider}
 }
 
-func (metadataClient MetadataClient) FetchMetadata() (*types.CloudflareMetadata, error) {
-	client := metadataClient.Http
+func (mdc metadataClient) FetchMetadata() (*types.CloudflareMetadata, error) {
+	client := mdc.Http
 
-	resp, err := client.Get(metadataClient.urlProvider.GetMetadataUrl())
+	resp, err := client.Get(mdc.urlProvider.GetMetadataUrl())
 	if err != nil {
 		return nil, err
 	}

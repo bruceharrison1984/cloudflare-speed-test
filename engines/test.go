@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/bruceharrison1984/cloudflare-speed-test/aggregators"
 	"github.com/bruceharrison1984/cloudflare-speed-test/clients"
 	"github.com/bruceharrison1984/cloudflare-speed-test/config"
 	"github.com/bruceharrison1984/cloudflare-speed-test/providers"
@@ -40,13 +41,14 @@ func (t *CloudflareSpeedTestEngine) RunSpeedTest(ctx context.Context) {
 	testId := rand.Int63()
 	httpTestClient := &http.Client{
 		Timeout:   time.Second * 20,
-		Transport: &clients.CloudflareSpeedTestTransport{}}
+		Transport: clients.NewCloudflareSpeedTestTransport(),
+	}
 
 	testConfig, iterations := config.GetDefaultConfig()
 
 	rawBandwidthResultsChan := make(chan *types.RawBandwidthClientResult, iterations)
 
-	urlProvider := providers.UrlProvider{}
+	urlProvider := providers.NewUrlProvider()
 	metadataClient := clients.NewMetadataClient(httpTestClient, urlProvider)
 	bandwidthEngine := NewBandwidthEngine(clients.NewBandwidthClient(httpTestClient), urlProvider)
 
@@ -56,7 +58,7 @@ func (t *CloudflareSpeedTestEngine) RunSpeedTest(ctx context.Context) {
 		return
 	}
 
-	resultsEngine := NewResultsEngine(t.SpeedTestSummaryChannel, metadata, t.Errors)
+	resultsEngine := aggregators.NewResultsAggregator(t.SpeedTestSummaryChannel, metadata, t.Errors)
 	go resultsEngine.Listen(rawBandwidthResultsChan, t.Errors)
 	bandwidthEngine.RunTest(ctx, testId, testConfig, rawBandwidthResultsChan, t.Errors)
 
