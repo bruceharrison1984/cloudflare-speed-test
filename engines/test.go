@@ -69,7 +69,7 @@ func (t *cloudflareSpeedTestEngine) RunSpeedTest(ctx context.Context, testCases 
 
 	resultsEngine := aggregators.NewResultsAggregator(t.SpeedTestSummaryChannel, metadata)
 	go resultsEngine.Listen(rawBandwidthResultsChan)
-	bandwidthEngine.RunTest(ctx, testId, testConfig, rawBandwidthResultsChan, t.ErrorChannel)
+	bandwidthEngine.RunTest(ctx, testId, testCases, rawBandwidthResultsChan, t.ErrorChannel)
 
 	close(t.ExitChannel)
 	// close(t.ErrorChannel) not sure if this should be closed?
