@@ -26,30 +26,14 @@ Listen to the raw data channels and compile metrics in real-time based on the re
 
 Compiled results are available on the SpeedTestSummaryChannel.
 */
-func (engine *resultsAggregator) Listen(rawResultsChan chan *types.RawBandwidthClientResult, errorChan chan error) {
-	for {
-		select {
-		case rawResult, ok := <-rawResultsChan:
-			{
-				if !ok {
-					return
-				}
-
-				calculatedResult := engine.calculateMetrics(rawResult.ResultType, rawResult.ServerTiming, rawResult.TTFB, rawResult.TTLB, rawResult.PayloadSizeBytes)
-				engine.bandwidthResults = append(engine.bandwidthResults, &calculatedResult)
-				engine.SpeedTestSummaryChannel <- &types.SpeedTestSummary{
-					TestResults: engine.bandwidthResults,
-					Metadata:    engine.speedTestMetadata,
-					Bandwidth:   engine.CalculatePercentiles(),
-				}
-			}
-		case err, ok := <-errorChan:
-			{
-				if ok {
-					engine.ErrorChannel <- err
-					return
-				}
-			}
+func (engine *resultsAggregator) Listen(rawResultsChan chan *types.RawBandwidthClientResult) {
+	for rawResult := range rawResultsChan {
+		calculatedResult := engine.calculateMetrics(rawResult.ResultType, rawResult.ServerTiming, rawResult.TTFB, rawResult.TTLB, rawResult.PayloadSizeBytes)
+		engine.bandwidthResults = append(engine.bandwidthResults, &calculatedResult)
+		engine.SpeedTestSummaryChannel <- &types.SpeedTestSummary{
+			TestResults: engine.bandwidthResults,
+			Metadata:    engine.speedTestMetadata,
+			Bandwidth:   engine.CalculatePercentiles(),
 		}
 	}
 }
