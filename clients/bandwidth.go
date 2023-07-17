@@ -16,24 +16,25 @@ import (
 )
 
 /* This is the client that is used during the bandwidth test */
-type BandwidthClient struct {
+type BandwidthTestClient struct {
 	Http *http.Client
 }
 
 /* Create a new bandwidth client */
-func NewBandwidthClient(http *http.Client) *BandwidthClient {
-	return &BandwidthClient{http}
+func NewBandwidthClient(http *http.Client) *BandwidthTestClient {
+	return &BandwidthTestClient{http}
 }
 
 /* Begin running the bandwidth test */
-func (client BandwidthClient) RunTest(ctx context.Context, url string, testId int64, payloadLength int64, testType types.BandwidthTestType) (*types.RawBandwidthClientResult, error) {
+func (client BandwidthTestClient) RunTest(ctx context.Context, url string, testId int64, payloadLength int64, testType types.BandwidthTestType) (*types.RawBandwidthClientResult, error) {
 	var handshakeComplete time.Time
 	var ttfb, ttlb time.Duration
 
 	trace := &httptrace.ClientTrace{
 		GotConn: func(gci httptrace.GotConnInfo) {
+			// retreiving a connection can be slow, so we don't start timing until it has completed
 			handshakeComplete = time.Now()
-		}, // retreiving a connection can be slow, so we don't start timing until it has completed
+		},
 		GotFirstResponseByte: func() {
 			ttfb = time.Since(handshakeComplete)
 		},
@@ -88,7 +89,7 @@ func (client BandwidthClient) RunTest(ctx context.Context, url string, testId in
 }
 
 /* Create a zero'd out payload for use in bandwidth test */
-func (runner BandwidthClient) createRequestBody(testType types.BandwidthTestType, payloadLength int64) io.Reader {
+func (runner BandwidthTestClient) createRequestBody(testType types.BandwidthTestType, payloadLength int64) io.Reader {
 	if testType == types.Download {
 		return nil
 	}
@@ -97,7 +98,7 @@ func (runner BandwidthClient) createRequestBody(testType types.BandwidthTestType
 }
 
 // Extract server time from response headers
-func (runner BandwidthClient) getServerTiming(headers *http.Header) time.Duration {
+func (runner BandwidthTestClient) getServerTiming(headers *http.Header) time.Duration {
 	var rawTiming = headers.Get("server-timing")
 
 	regex, _ := regexp.Compile("dur=([0-9.]+)")

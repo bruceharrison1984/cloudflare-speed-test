@@ -10,12 +10,12 @@ import (
 
 /* This engine runs the bandwidth test */
 type BandwidthEngine struct {
-	SpeedTestClient *clients.BandwidthClient
+	SpeedTestClient *clients.BandwidthTestClient
 	urlProvider     providers.UrlProvider
 }
 
 /* Create a new bandwidth engine */
-func NewBandwidthEngine(speedTestClient *clients.BandwidthClient, urlProvider providers.UrlProvider) *BandwidthEngine {
+func NewBandwidthEngine(speedTestClient *clients.BandwidthTestClient, urlProvider providers.UrlProvider) *BandwidthEngine {
 	return &BandwidthEngine{speedTestClient, urlProvider}
 }
 

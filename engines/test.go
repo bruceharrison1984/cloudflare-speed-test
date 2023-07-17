@@ -17,7 +17,7 @@ The primary engine for running CloudFlare speed tests.
 
 This is probably the one you want.
 */
-type TestEngine struct {
+type CloudflareSpeedTestEngine struct {
 	SpeedTestSummaryChannel   chan *types.SpeedTestSummary   // Piping this channel will give access to the final summary once a run completes
 	CloudflareMetadataResults chan *types.CloudflareMetadata // Listen here for test metadata
 	Exit                      chan struct{}                  // Listen here to end the listener loop
@@ -25,22 +25,22 @@ type TestEngine struct {
 }
 
 /* Create a new test engine */
-func NewTestEngine() *TestEngine {
-	return &TestEngine{
-		SpeedTestSummaryChannel:   make(chan *types.SpeedTestSummary),
-		CloudflareMetadataResults: make(chan *types.CloudflareMetadata),
-		Exit:                      make(chan struct{}),
-		Errors:                    make(chan error),
+func NewTestEngine() *CloudflareSpeedTestEngine {
+	return &CloudflareSpeedTestEngine{
+		SpeedTestSummaryChannel:   make(chan *types.SpeedTestSummary),   // this should be passed in
+		CloudflareMetadataResults: make(chan *types.CloudflareMetadata), // this should be passed in
+		Exit:                      make(chan struct{}),                  // this should be passed in
+		Errors:                    make(chan error),                     // this should be passed in
 	}
 }
 
 /* Run the speed tests */
-func (t *TestEngine) RunSpeedTest(ctx context.Context) {
+func (t *CloudflareSpeedTestEngine) RunSpeedTest(ctx context.Context) {
 
 	testId := rand.Int63()
 	httpTestClient := &http.Client{
 		Timeout:   time.Second * 20,
-		Transport: &clients.SpeedTestTransport{}}
+		Transport: &clients.CloudflareSpeedTestTransport{}}
 
 	testConfig, iterations := config.GetDefaultConfig()
 

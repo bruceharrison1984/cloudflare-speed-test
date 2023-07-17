@@ -4,12 +4,13 @@ import (
 	"net/http"
 )
 
-type SpeedTestTransport struct {
+/* Overrides for the default transport */
+type CloudflareSpeedTestTransport struct {
 	base http.RoundTripper
 	http.Transport
 }
 
-func (t *SpeedTestTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+func (t *CloudflareSpeedTestTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	t.MaxIdleConns = 100
 	t.MaxIdleConnsPerHost = 100
 
