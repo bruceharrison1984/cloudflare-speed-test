@@ -2,6 +2,15 @@
 
 This package mimics the behavior of the Cloudflare Speed Test webpage. It will run tests, then return values across channels.
 
+Each subsequent test iteration will output the aggregated results on the `types.SpeedTestSummary` channel.
+
+The `types.SpeedTestSummary` object is as follows:
+| Property | Description |
+|---|---|
+| Metadata | Information about the client connection |
+| Bandwidth | Current aggregate test results (90th percentile)|
+| TestResults | An array of the raw test results. New results are appended to this array for each test iteration |
+
 ## Basic Usage
 
 ```golang
