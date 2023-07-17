@@ -20,11 +20,10 @@ import (
 )
 
 speedTestSummaryChannel := make(chan *types.SpeedTestSummary)
-cloudflareMetadataResults := make(chan *types.CloudflareMetadata)
 exitChannel := make(chan struct{})
 errorChannel := make(chan error)
 
-engine := engines.NewTestEngine(speedTestSummaryChannel, cloudflareMetadataResults, exitChannel, errorChannel)
+engine := engines.NewTestEngine(speedTestSummaryChannel, exitChannel, errorChannel)
 
 logger, err := s.Logger(errorChannel)
 if err != nil {

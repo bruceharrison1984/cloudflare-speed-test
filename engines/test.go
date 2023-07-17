@@ -25,21 +25,19 @@ This is probably the one you want.
 type cloudflareSpeedTestEngine struct {
 	SpeedTestSummaryChannel   chan *types.SpeedTestSummary   // Piping this channel will give access to the final summary once a run completes
 	CloudflareMetadataResults chan *types.CloudflareMetadata // Listen here for test metadata
-	Exit                      chan struct{}                  // Listen here to end the listener loop
-	Errors                    chan error                     // Errors are reported here, which also ends the listener loop
+	ExitChannel               chan struct{}                  // Listen here to end the listener loop
+	ErrorChannel              chan error                     // Errors are reported here, which also ends the listener loop
 }
 
 /* Create a new test engine */
 func NewTestEngine(
 	speedTestSummaryChannel chan *types.SpeedTestSummary,
-	cloudflareMetadataResults chan *types.CloudflareMetadata,
 	exitChannel chan struct{},
 	errorChannel chan error) ISpeedTestEngine {
 	return &cloudflareSpeedTestEngine{
-		SpeedTestSummaryChannel:   speedTestSummaryChannel,   // this should be passed in
-		CloudflareMetadataResults: cloudflareMetadataResults, // this should be passed in
-		Exit:                      exitChannel,               // this should be passed in
-		Errors:                    errorChannel,              // this should be passed in
+		SpeedTestSummaryChannel: speedTestSummaryChannel, // this should be passed in
+		ExitChannel:             exitChannel,             // this should be passed in
+		ErrorChannel:            errorChannel,            // this should be passed in
 	}
 }
 
@@ -62,15 +60,15 @@ func (t *cloudflareSpeedTestEngine) RunSpeedTest(ctx context.Context) {
 
 	metadata, err := metadataClient.FetchMetadata()
 	if err != nil {
-		t.Errors <- err
+		t.ErrorChannel <- err
 		return
 	}
 
-	resultsEngine := aggregators.NewResultsAggregator(t.SpeedTestSummaryChannel, metadata, t.Errors)
-	go resultsEngine.Listen(rawBandwidthResultsChan, t.Errors)
-	bandwidthEngine.RunTest(ctx, testId, testConfig, rawBandwidthResultsChan, t.Errors)
+	resultsEngine := aggregators.NewResultsAggregator(t.SpeedTestSummaryChannel, metadata, t.ErrorChannel)
+	go resultsEngine.Listen(rawBandwidthResultsChan, t.ErrorChannel)
+	bandwidthEngine.RunTest(ctx, testId, testConfig, rawBandwidthResultsChan, t.ErrorChannel)
 
-	close(t.Exit)
-	close(t.Errors)
+	close(t.ExitChannel)
+	close(t.ErrorChannel)
 	close(t.SpeedTestSummaryChannel)
 }
