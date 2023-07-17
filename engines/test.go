@@ -13,12 +13,16 @@ import (
 	"github.com/bruceharrison1984/cloudflare-speed-test/types"
 )
 
+type ISpeedTestEngine interface {
+	RunSpeedTest(ctx context.Context)
+}
+
 /*
 The primary engine for running CloudFlare speed tests.
 
 This is probably the one you want.
 */
-type CloudflareSpeedTestEngine struct {
+type cloudflareSpeedTestEngine struct {
 	SpeedTestSummaryChannel   chan *types.SpeedTestSummary   // Piping this channel will give access to the final summary once a run completes
 	CloudflareMetadataResults chan *types.CloudflareMetadata // Listen here for test metadata
 	Exit                      chan struct{}                  // Listen here to end the listener loop
@@ -26,17 +30,21 @@ type CloudflareSpeedTestEngine struct {
 }
 
 /* Create a new test engine */
-func NewTestEngine() *CloudflareSpeedTestEngine {
-	return &CloudflareSpeedTestEngine{
-		SpeedTestSummaryChannel:   make(chan *types.SpeedTestSummary),   // this should be passed in
-		CloudflareMetadataResults: make(chan *types.CloudflareMetadata), // this should be passed in
-		Exit:                      make(chan struct{}),                  // this should be passed in
-		Errors:                    make(chan error),                     // this should be passed in
+func NewTestEngine(
+	speedTestSummaryChannel chan *types.SpeedTestSummary,
+	cloudflareMetadataResults chan *types.CloudflareMetadata,
+	exitChannel chan struct{},
+	errorChannel chan error) ISpeedTestEngine {
+	return &cloudflareSpeedTestEngine{
+		SpeedTestSummaryChannel:   speedTestSummaryChannel,   // this should be passed in
+		CloudflareMetadataResults: cloudflareMetadataResults, // this should be passed in
+		Exit:                      exitChannel,               // this should be passed in
+		Errors:                    errorChannel,              // this should be passed in
 	}
 }
 
 /* Run the speed tests */
-func (t *CloudflareSpeedTestEngine) RunSpeedTest(ctx context.Context) {
+func (t *cloudflareSpeedTestEngine) RunSpeedTest(ctx context.Context) {
 
 	testId := rand.Int63()
 	httpTestClient := &http.Client{
