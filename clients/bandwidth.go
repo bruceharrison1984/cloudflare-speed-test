@@ -15,14 +15,17 @@ import (
 	"github.com/bruceharrison1984/cloudflare-speed-test/types"
 )
 
+/* This is the client that is used during the bandwidth test */
 type BandwidthClient struct {
 	Http *http.Client
 }
 
+/* Create a new bandwidth client */
 func NewBandwidthClient(http *http.Client) *BandwidthClient {
 	return &BandwidthClient{http}
 }
 
+/* Begin running the bandwidth test */
 func (client BandwidthClient) RunTest(ctx context.Context, url string, testId int64, payloadLength int64, testType types.BandwidthTestType) (*types.RawBandwidthClientResult, error) {
 	var handshakeComplete time.Time
 	var ttfb, ttlb time.Duration
@@ -39,7 +42,7 @@ func (client BandwidthClient) RunTest(ctx context.Context, url string, testId in
 		},
 	}
 
-	requestBody := client.getRequestBody(testType, payloadLength)
+	requestBody := client.createRequestBody(testType, payloadLength)
 
 	requestType := http.MethodGet
 	if testType == types.Upload {
@@ -84,7 +87,8 @@ func (client BandwidthClient) RunTest(ctx context.Context, url string, testId in
 	return rawResults, nil
 }
 
-func (runner BandwidthClient) getRequestBody(testType types.BandwidthTestType, payloadLength int64) io.Reader {
+/* Create a zero'd out payload for use in bandwidth test */
+func (runner BandwidthClient) createRequestBody(testType types.BandwidthTestType, payloadLength int64) io.Reader {
 	if testType == types.Download {
 		return nil
 	}
