@@ -36,48 +36,54 @@ go engine.RunSpeedTest(cf.ctx)
 // your preferred logger
 logger.Info("Starting Speed Test")
 
-var measurementId string
 for {
     select {
-    case _, ok := <-cloudflareMetadataResults:
-        {
-            if ok {
-                // payload := types.NewUptimeMeasurementRequest(*metadata)
-                // measurementResponse := commsUpClient.PostUptimeMeasurement(*payload)
-                // measurementId = measurementResponse.Data.Id
-                logger.Infof("Measurement Id: %s", measurementId)
-                // if cf.verbose {
-                // 	jsonObj, _ := json.MarshalIndent(metadata, "", "  ")
-                // 	logger.Infof(string(jsonObj))
-                // }
-            }
-        }
-    case summary, ok := <-speedTestSummaryChannel:
-        {
-            if ok {
-                if cf.verbose {
-                    // jsonObj, _ := json.MarshalIndent(summary, "", "  ")
-                    logger.Infof("Download: %+v\n", summary.Bandwidth.DownloadSpeedMbps)
-                    logger.Infof("  Upload: %+v\n", summary.Bandwidth.UploadSpeedMbps)
-                    logger.Infof("    Ping: %+v\n", summary.Bandwidth.Ping)
+        case summary, ok := <-speedTestSummaryChannel:
+            {
+                if ok {
+                    if cf.verbose {
+                        // jsonObj, _ := json.MarshalIndent(summary, "", "  ")
+                        logger.Infof("Download: %+v\n", summary.Bandwidth.DownloadSpeedMbps)
+                        logger.Infof("  Upload: %+v\n", summary.Bandwidth.UploadSpeedMbps)
+                        logger.Infof("    Ping: %+v\n", summary.Bandwidth.Ping)
+                    }
                 }
             }
-        }
-    case _, ok := <-exitChannel:
-        {
-            if !ok {
-                logger.Info("Speed test completed")
-                return
+        case _, ok := <-exitChannel:
+            {
+                if !ok {
+                    logger.Info("Speed test completed")
+                    return
+                }
             }
-        }
-    case err, ok := <-errorChannel:
-        {
-            if ok {
-                logger.Error("Error occured, speed test failed!")
-                logger.Error(err)
-                return
+        case err, ok := <-errorChannel:
+            {
+                if ok {
+                    logger.Error("Error occured, speed test failed!")
+                    logger.Error(err)
+                    return
+                }
             }
-        }
     }
 }
+```
+
+Running this should output something similar to:
+
+```sh
+...
+I: 13:33:18     Ping: 0.014
+I: 13:33:19 Download: 673.508
+I: 13:33:19   Upload: 385.959
+I: 13:33:19     Ping: 0.014
+I: 13:33:19 Download: 673.508
+I: 13:33:19   Upload: 413.899
+I: 13:33:19     Ping: 0.014
+I: 13:33:20 Download: 673.508
+I: 13:33:20   Upload: 413.899
+I: 13:33:20     Ping: 0.013
+I: 13:33:21 Download: 673.508
+I: 13:33:21   Upload: 413.899
+I: 13:33:21     Ping: 0.013
+I: 13:33:22 Speed test completed
 ```
