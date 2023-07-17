@@ -13,12 +13,11 @@ type resultsAggregator struct {
 	speedTestMetadata       *types.CloudflareMetadata
 	SpeedTestSummaryChannel chan *types.SpeedTestSummary   // Piping this channel will give access to the final summary once a run completes
 	bandwidthResults        []*types.BandwidthClientResult // Internal array of results
-	ErrorChannel            chan error                     // Piping this channel will give access to real-time errors
 }
 
 /* Create a new results engine */
-func NewResultsAggregator(summaryChannel chan *types.SpeedTestSummary, metadata *types.CloudflareMetadata, outputErrors chan error) *resultsAggregator {
-	return &resultsAggregator{SpeedTestSummaryChannel: summaryChannel, speedTestMetadata: metadata, ErrorChannel: outputErrors}
+func NewResultsAggregator(summaryChannel chan *types.SpeedTestSummary, metadata *types.CloudflareMetadata) *resultsAggregator {
+	return &resultsAggregator{SpeedTestSummaryChannel: summaryChannel, speedTestMetadata: metadata}
 }
 
 /*
