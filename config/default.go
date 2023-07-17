@@ -2,6 +2,7 @@ package config
 
 import "github.com/bruceharrison1984/cloudflare-speed-test/types"
 
+/* Retreive default test cases */
 func GetDefaultConfig() ([]types.SpeedTestCase, int) {
 	downloadTestCases := make([]types.SpeedTestCase, 10)
 	downloadTestCases[0] = types.SpeedTestCase{PayloadSize: 1e5, Iterations: 10, TestType: types.Download}

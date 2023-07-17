@@ -12,7 +12,11 @@ import (
 	"github.com/bruceharrison1984/cloudflare-speed-test/types"
 )
 
-// The primary engine for running CloudFlare speed tests. This is probably the one you want.
+/*
+The primary engine for running CloudFlare speed tests.
+
+This is probably the one you want.
+*/
 type TestEngine struct {
 	SpeedTestSummaryChannel   chan *types.SpeedTestSummary   // Piping this channel will give access to the final summary once a run completes
 	CloudflareMetadataResults chan *types.CloudflareMetadata // Listen here for test metadata
@@ -20,6 +24,7 @@ type TestEngine struct {
 	Errors                    chan error                     // Errors are reported here, which also ends the listener loop
 }
 
+/* Create a new test engine */
 func NewTestEngine() *TestEngine {
 	return &TestEngine{
 		SpeedTestSummaryChannel:   make(chan *types.SpeedTestSummary),
@@ -29,6 +34,7 @@ func NewTestEngine() *TestEngine {
 	}
 }
 
+/* Run the speed tests */
 func (t *TestEngine) RunSpeedTest(ctx context.Context) {
 
 	testId := rand.Int63()

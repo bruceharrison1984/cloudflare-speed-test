@@ -8,15 +8,18 @@ import (
 	"github.com/bruceharrison1984/cloudflare-speed-test/types"
 )
 
+/* This engine runs the bandwidth test */
 type BandwidthEngine struct {
 	SpeedTestClient *clients.BandwidthClient
 	urlProvider     providers.UrlProvider
 }
 
+/* Create a new bandwidth engine */
 func NewBandwidthEngine(speedTestClient *clients.BandwidthClient, urlProvider providers.UrlProvider) *BandwidthEngine {
 	return &BandwidthEngine{speedTestClient, urlProvider}
 }
 
+/* Run the bandwidth test */
 func (engine *BandwidthEngine) RunTest(ctx context.Context, testId int64, testCases []types.SpeedTestCase, rawResultsChannel chan *types.RawBandwidthClientResult, errorChan chan error) {
 	for x := 0; x < len(testCases); x++ {
 		testCase := testCases[x]

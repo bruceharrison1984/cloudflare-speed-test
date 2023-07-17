@@ -8,6 +8,7 @@ import (
 	"github.com/montanaflynn/stats"
 )
 
+/* Engine that aggregates the test results */
 type ResultsEngine struct {
 	speedTestMetadata       *types.CloudflareMetadata
 	SpeedTestSummaryChannel chan *types.SpeedTestSummary   // Piping this channel will give access to the final summary once a run completes
@@ -15,12 +16,16 @@ type ResultsEngine struct {
 	ErrorChannel            chan error                     // Piping this channel will give access to real-time errors
 }
 
+/* Create a new results engine */
 func NewResultsEngine(summaryChannel chan *types.SpeedTestSummary, metadata *types.CloudflareMetadata, outputErrors chan error) *ResultsEngine {
 	return &ResultsEngine{SpeedTestSummaryChannel: summaryChannel, speedTestMetadata: metadata, ErrorChannel: outputErrors}
 }
 
-// Listen to the raw data channels and compile metrics in real-time based on the results
-// Compiled results are available on the ResultChannel.
+/*
+Listen to the raw data channels and compile metrics in real-time based on the results.
+
+Compiled results are available on the SpeedTestSummaryChannel.
+*/
 func (engine *ResultsEngine) Listen(rawResultsChan chan *types.RawBandwidthClientResult, errorChan chan error) {
 	for {
 		select {
