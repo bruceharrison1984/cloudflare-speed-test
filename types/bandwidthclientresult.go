@@ -2,6 +2,7 @@ package types
 
 import "time"
 
+/* The type of bandwidth test */
 type BandwidthTestType int16
 
 const (
