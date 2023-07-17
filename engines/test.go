@@ -1,4 +1,4 @@
-package main
+package engines
 
 import (
 	"context"
@@ -8,7 +8,6 @@ import (
 
 	"github.com/bruceharrison1984/cloudflare-speed-test/clients"
 	"github.com/bruceharrison1984/cloudflare-speed-test/config"
-	"github.com/bruceharrison1984/cloudflare-speed-test/engines"
 	"github.com/bruceharrison1984/cloudflare-speed-test/providers"
 	"github.com/bruceharrison1984/cloudflare-speed-test/types"
 )
@@ -43,7 +42,7 @@ func (t *TestEngine) RunSpeedTest(ctx context.Context) {
 
 	urlProvider := providers.UrlProvider{}
 	metadataClient := clients.NewMetadataClient(httpTestClient, urlProvider)
-	bandwidthEngine := engines.NewBandwidthEngine(clients.NewBandwidthClient(httpTestClient), urlProvider)
+	bandwidthEngine := NewBandwidthEngine(clients.NewBandwidthClient(httpTestClient), urlProvider)
 
 	metadata, err := metadataClient.FetchMetadata()
 	if err != nil {
@@ -51,7 +50,7 @@ func (t *TestEngine) RunSpeedTest(ctx context.Context) {
 		return
 	}
 
-	resultsEngine := engines.NewResultsEngine(t.SpeedTestSummaryChannel, metadata, t.Errors)
+	resultsEngine := NewResultsEngine(t.SpeedTestSummaryChannel, metadata, t.Errors)
 	go resultsEngine.Listen(rawBandwidthResultsChan, t.Errors)
 	bandwidthEngine.RunTest(ctx, testId, testConfig, rawBandwidthResultsChan, t.Errors)
 
