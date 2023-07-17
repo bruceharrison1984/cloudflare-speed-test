@@ -8,13 +8,12 @@ import (
 
 	"github.com/bruceharrison1984/cloudflare-speed-test/aggregators"
 	"github.com/bruceharrison1984/cloudflare-speed-test/clients"
-	"github.com/bruceharrison1984/cloudflare-speed-test/config"
 	"github.com/bruceharrison1984/cloudflare-speed-test/providers"
 	"github.com/bruceharrison1984/cloudflare-speed-test/types"
 )
 
 type ISpeedTestEngine interface {
-	RunSpeedTest(ctx context.Context)
+	RunSpeedTest(ctx context.Context, testCases []types.SpeedTestCase)
 }
 
 /*
@@ -42,7 +41,7 @@ func NewTestEngine(
 }
 
 /* Run the speed tests */
-func (t *cloudflareSpeedTestEngine) RunSpeedTest(ctx context.Context) {
+func (t *cloudflareSpeedTestEngine) RunSpeedTest(ctx context.Context, testCases []types.SpeedTestCase) {
 
 	testId := rand.Int63()
 	httpTestClient := &http.Client{
@@ -50,7 +49,11 @@ func (t *cloudflareSpeedTestEngine) RunSpeedTest(ctx context.Context) {
 		Transport: clients.NewCloudflareSpeedTestTransport(),
 	}
 
-	testConfig, iterations := config.GetDefaultConfig()
+	// testConfig, iterations := config.GetDefaultConfig()
+	var iterations int
+	for i := 0; i < len(testCases); i++ {
+		iterations += testCases[i].Iterations
+	}
 
 	rawBandwidthResultsChan := make(chan *types.RawBandwidthClientResult, iterations)
 
