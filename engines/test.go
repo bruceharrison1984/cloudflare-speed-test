@@ -72,6 +72,6 @@ func (t *cloudflareSpeedTestEngine) RunSpeedTest(ctx context.Context, testCases 
 	bandwidthEngine.RunTest(ctx, testId, testCases, rawBandwidthResultsChan, t.ErrorChannel)
 
 	close(t.ExitChannel)
-	// close(t.ErrorChannel) not sure if this should be closed?
-	// close(t.SpeedTestSummaryChannel) not sure if this should be closed?
+	close(t.ErrorChannel)
+	close(t.SpeedTestSummaryChannel)
 }
